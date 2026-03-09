@@ -1,0 +1,63 @@
+# red_flags.yaml
+# Rule-based red flag definitions loaded by RedFlagDetector.
+# Each flag has a severity level, trigger keywords/phrases, and a
+# human-readable description for the report.
+#
+# severity levels:
+#   URGENT  — requires same-day or emergency escalation
+#   WARNING — requires prompt (within 48 h) follow-up or referral
+#   WATCH   — note and monitor; reassess at next visit
+#
+# TODO: validate keyword lists against MTS-Dialog conversations and
+#       supplement with semantic matching via the LLM pass.
+
+# ---------------------------------------------------------------------------
+# Placeholder flag definitions (expand before implementing RedFlagDetector)
+# ---------------------------------------------------------------------------
+
+flags:
+  # TODO: Chest pain red flags
+  # chest_pain_urgent:
+  #   severity: URGENT
+  #   description: "Possible acute coronary syndrome"
+  #   keywords:
+  #     - crushing chest pain
+  #     - chest tightness with radiation
+  #     - pain radiating to arm
+  #     - pain radiating to jaw
+  #   negation_check: true
+
+  # TODO: Neurological red flags
+  # sudden_severe_headache:
+  #   severity: URGENT
+  #   description: "Possible subarachnoid haemorrhage (thunderclap headache)"
+  #   keywords:
+  #     - worst headache of my life
+  #     - thunderclap
+  #     - sudden severe headache
+
+  # TODO: Respiratory red flags
+  # breathing_difficulty:
+  #   severity: URGENT
+  #   description: "Acute respiratory compromise"
+  #   keywords:
+  #     - can't breathe
+  #     - difficulty breathing
+  #     - shortness of breath at rest
+
+  # TODO: Oncology red flags
+  # unexplained_weight_loss:
+  #   severity: WARNING
+  #   description: "Unexplained weight loss — possible malignancy"
+  #   keywords:
+  #     - losing weight without trying
+  #     - unexplained weight loss
+
+  # TODO: Safeguarding red flags
+  # safeguarding:
+  #   severity: URGENT
+  #   description: "Possible safeguarding concern"
+  #   keywords:
+  #     - hurting myself
+  #     - want to die
+  #     - suicidal

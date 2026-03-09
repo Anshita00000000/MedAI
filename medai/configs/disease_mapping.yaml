@@ -1,0 +1,40 @@
+# disease_mapping.yaml
+# Maps common disease / symptom labels to ICD-10-CM codes.
+# Used by DDxEngine to annotate differential diagnoses.
+#
+# TODO: populate with a comprehensive mapping covering the top conditions
+#       seen in the MTS-Dialog training set specialities.
+#
+# Format:
+#   <canonical_label>:
+#     icd10: <code>
+#     synonyms:
+#       - <alternate name 1>
+#       - <alternate name 2>
+#     category: <broad category, e.g. "Respiratory", "Cardiovascular">
+
+# ---------------------------------------------------------------------------
+# Placeholder entries (expand before implementing DDxEngine)
+# ---------------------------------------------------------------------------
+
+# TODO: add Respiratory conditions
+# pneumonia:
+#   icd10: J18.9
+#   synonyms: [lung infection, chest infection]
+#   category: Respiratory
+
+# TODO: add Cardiovascular conditions
+# acute_myocardial_infarction:
+#   icd10: I21.9
+#   synonyms: [heart attack, MI, STEMI, NSTEMI]
+#   category: Cardiovascular
+
+# TODO: add Gastrointestinal conditions
+
+# TODO: add Neurological conditions
+
+# TODO: add Musculoskeletal conditions
+
+# TODO: add Endocrine conditions (e.g. diabetes, thyroid)
+
+# TODO: add Common primary care conditions (UTI, URTI, etc.)
