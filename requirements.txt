@@ -1,0 +1,17 @@
+# MedAI — Step 0: Data Acquisition
+# Install with: pip install -r requirements.txt
+
+# HuggingFace dataset downloading & streaming
+datasets>=2.19.0
+
+# Required by datasets for Parquet / Arrow files
+pyarrow>=14.0.0
+
+# HTTP requests used internally by datasets
+requests>=2.31.0
+
+# Progress bars shown during HuggingFace downloads
+tqdm>=4.66.0
+
+# Used by datasets for hub authentication (optional but avoids warnings)
+huggingface-hub>=0.23.0
