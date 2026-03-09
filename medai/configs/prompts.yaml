@@ -1,0 +1,53 @@
+# prompts.yaml
+# Prompt templates for every Claude API call in the MedAI pipeline.
+# Each key maps to a template string; use {variable} placeholders.
+#
+# TODO: fill in final prompt text once the pipeline is validated on
+#       the MTS-Dialog evaluation set.
+
+# ---------------------------------------------------------------------------
+# Entity Extraction
+# ---------------------------------------------------------------------------
+entity_extraction:
+  system: |
+    # TODO: system prompt for clinical entity extraction
+    # Should instruct the model to extract symptoms, medications,
+    # vital signs, allergies, and social history as structured JSON.
+  user: |
+    # TODO: user turn template
+    # Placeholder: {transcript}
+
+# ---------------------------------------------------------------------------
+# SOAP Note Generation
+# ---------------------------------------------------------------------------
+soap_generation:
+  system: |
+    # TODO: system prompt for SOAP note generation
+    # Should define SOAP format, expected section headings, and
+    # instructions for handling incomplete information.
+  user: |
+    # TODO: user turn template
+    # Placeholders: {transcript}, {entities}
+
+# ---------------------------------------------------------------------------
+# Differential Diagnosis
+# ---------------------------------------------------------------------------
+ddx:
+  system: |
+    # TODO: system prompt for DDx reasoning
+    # Should request ranked differentials with ICD-10 codes,
+    # supporting/excluding features, and next steps.
+  user: |
+    # TODO: user turn template
+    # Placeholders: {symptoms}, {history}, {entities}
+
+# ---------------------------------------------------------------------------
+# Red Flag Semantic Check (LLM pass, optional)
+# ---------------------------------------------------------------------------
+red_flag_semantic:
+  system: |
+    # TODO: system prompt for semantic red-flag detection
+    # Supplements the rule-based pass in red_flag_detector.py
+  user: |
+    # TODO: user turn template
+    # Placeholder: {transcript}
