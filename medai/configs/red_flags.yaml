@@ -1,63 +1,134 @@
 # red_flags.yaml
-# Rule-based red flag definitions loaded by RedFlagDetector.
-# Each flag has a severity level, trigger keywords/phrases, and a
-# human-readable description for the report.
-#
-# severity levels:
-#   URGENT  — requires same-day or emergency escalation
-#   WARNING — requires prompt (within 48 h) follow-up or referral
-#   WATCH   — note and monitor; reassess at next visit
-#
-# TODO: validate keyword lists against MTS-Dialog conversations and
-#       supplement with semantic matching via the LLM pass.
+# Red-flag rule definitions loaded by RedFlagDetector.
+# Severity levels:
+#   critical — requires immediate emergency intervention
+#   urgent   — requires same-day or prompt escalation
+#   monitor  — note and monitor; reassess at next visit
 
-# ---------------------------------------------------------------------------
-# Placeholder flag definitions (expand before implementing RedFlagDetector)
-# ---------------------------------------------------------------------------
+red_flags:
+  critical:
+    - term: "chest pain"
+      category: cardiac
+      keywords:
+        - chest pain
+        - chest pressure
+        - chest tightness
+        - crushing chest
+      description: "Possible acute coronary syndrome or cardiac emergency"
+      action: "Immediate ECG and cardiac enzyme panel"
 
-flags:
-  # TODO: Chest pain red flags
-  # chest_pain_urgent:
-  #   severity: URGENT
-  #   description: "Possible acute coronary syndrome"
-  #   keywords:
-  #     - crushing chest pain
-  #     - chest tightness with radiation
-  #     - pain radiating to arm
-  #     - pain radiating to jaw
-  #   negation_check: true
+    - term: "difficulty breathing"
+      category: respiratory
+      keywords:
+        - difficulty breathing
+        - can't breathe
+        - unable to breathe
+        - shortness of breath
+        - respiratory distress
+      description: "Acute respiratory compromise"
+      action: "Assess airway, O2 saturation, consider emergency intervention"
 
-  # TODO: Neurological red flags
-  # sudden_severe_headache:
-  #   severity: URGENT
-  #   description: "Possible subarachnoid haemorrhage (thunderclap headache)"
-  #   keywords:
-  #     - worst headache of my life
-  #     - thunderclap
-  #     - sudden severe headache
+    - term: "stroke symptoms"
+      category: neurological
+      keywords:
+        - facial droop
+        - arm weakness
+        - speech difficulty
+        - sudden numbness
+        - worst headache of my life
+        - thunderclap headache
+      description: "Possible acute stroke — FAST criteria"
+      action: "Immediate CT head, stroke team activation"
 
-  # TODO: Respiratory red flags
-  # breathing_difficulty:
-  #   severity: URGENT
-  #   description: "Acute respiratory compromise"
-  #   keywords:
-  #     - can't breathe
-  #     - difficulty breathing
-  #     - shortness of breath at rest
+    - term: "altered consciousness"
+      category: neurological
+      keywords:
+        - unconscious
+        - unresponsive
+        - altered consciousness
+        - confusion
+        - disoriented
+        - loss of consciousness
+      description: "Altered mental status requiring urgent evaluation"
+      action: "Neurological assessment, blood glucose, CT if indicated"
 
-  # TODO: Oncology red flags
-  # unexplained_weight_loss:
-  #   severity: WARNING
-  #   description: "Unexplained weight loss — possible malignancy"
-  #   keywords:
-  #     - losing weight without trying
-  #     - unexplained weight loss
+    - term: "severe bleeding"
+      category: haematological
+      keywords:
+        - severe bleeding
+        - uncontrolled bleeding
+        - hemorrhage
+        - coughing up blood
+        - vomiting blood
+        - blood in stool
+      description: "Significant haemorrhage risk"
+      action: "Immediate haemostasis assessment, IV access, cross-match"
 
-  # TODO: Safeguarding red flags
-  # safeguarding:
-  #   severity: URGENT
-  #   description: "Possible safeguarding concern"
-  #   keywords:
-  #     - hurting myself
-  #     - want to die
-  #     - suicidal
+  urgent:
+    - term: "high fever"
+      category: infectious
+      keywords:
+        - high fever
+        - temperature above 39
+        - fever of 40
+        - rigors
+        - sepsis
+        - infected
+      description: "Possible systemic infection or sepsis"
+      action: "Blood cultures, sepsis protocol if indicated"
+
+    - term: "severe pain"
+      category: pain
+      keywords:
+        - severe pain
+        - excruciating
+        - pain scale 9
+        - pain scale 10
+        - unbearable pain
+        - worst pain
+      description: "Severe pain requiring prompt assessment"
+      action: "Pain assessment tool, analgesia review"
+
+    - term: "allergic reaction"
+      category: immunological
+      keywords:
+        - allergic reaction
+        - anaphylaxis
+        - hives
+        - throat swelling
+        - tongue swelling
+        - epipen
+      description: "Possible allergic or anaphylactic reaction"
+      action: "Epinephrine if anaphylaxis, antihistamine, monitor"
+
+  monitor:
+    - term: "weight loss"
+      category: systemic
+      keywords:
+        - weight loss
+        - losing weight
+        - lost weight unintentionally
+      description: "Unexplained weight loss — may indicate systemic illness"
+      action: "Document weight trend, screen for malignancy if >5% in 6 months"
+
+    - term: "persistent cough"
+      category: respiratory
+      keywords:
+        - persistent cough
+        - cough for weeks
+        - cough for months
+        - chronic cough
+      description: "Chronic cough — investigate underlying cause"
+      action: "CXR, spirometry if indicated"
+
+    - term: "safeguarding concern"
+      category: safeguarding
+      keywords:
+        - bruising
+        - unexplained injury
+        - abuse
+        - neglect
+        - afraid at home
+        - feels unsafe
+      description: "Possible safeguarding concern"
+      action: "Follow safeguarding protocol, document carefully"
