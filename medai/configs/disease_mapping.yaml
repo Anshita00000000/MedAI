@@ -1,40 +1,150 @@
 # disease_mapping.yaml
-# Maps common disease / symptom labels to ICD-10-CM codes.
-# Used by DDxEngine to annotate differential diagnoses.
-#
-# TODO: populate with a comprehensive mapping covering the top conditions
-#       seen in the MTS-Dialog training set specialities.
+# Disease keyword mappings used by DDxEngine for rule-based differential diagnosis.
+# Each entry defines keywords that suggest the diagnosis and a min_matches threshold.
 #
 # Format:
-#   <canonical_label>:
-#     icd10: <code>
-#     synonyms:
-#       - <alternate name 1>
-#       - <alternate name 2>
-#     category: <broad category, e.g. "Respiratory", "Cardiovascular">
+#   <speciality>:
+#     - name: <full disease name>
+#       icd10: <ICD-10-CM code>
+#       keywords: [list of symptom/finding keywords]
+#       min_matches: <minimum keyword hits required to include diagnosis>
 
-# ---------------------------------------------------------------------------
-# Placeholder entries (expand before implementing DDxEngine)
-# ---------------------------------------------------------------------------
+disease_mapping:
+  respiratory:
+    - name: "Community Acquired Pneumonia"
+      icd10: "J18.9"
+      keywords:
+        - fever
+        - cough
+        - shortness of breath
+        - chest pain
+        - sputum
+      min_matches: 3
 
-# TODO: add Respiratory conditions
-# pneumonia:
-#   icd10: J18.9
-#   synonyms: [lung infection, chest infection]
-#   category: Respiratory
+    - name: "Asthma Exacerbation"
+      icd10: "J45.901"
+      keywords:
+        - wheezing
+        - shortness of breath
+        - chest tightness
+        - inhaler
+      min_matches: 2
 
-# TODO: add Cardiovascular conditions
-# acute_myocardial_infarction:
-#   icd10: I21.9
-#   synonyms: [heart attack, MI, STEMI, NSTEMI]
-#   category: Cardiovascular
+    - name: "COPD Exacerbation"
+      icd10: "J44.1"
+      keywords:
+        - copd
+        - emphysema
+        - chronic bronchitis
+        - dyspnea
+        - inhaler
+      min_matches: 2
 
-# TODO: add Gastrointestinal conditions
+  cardiac:
+    - name: "Acute Coronary Syndrome"
+      icd10: "I24.9"
+      keywords:
+        - chest pain
+        - chest pressure
+        - radiating pain
+        - diaphoresis
+        - nausea
+      min_matches: 2
 
-# TODO: add Neurological conditions
+    - name: "Heart Failure"
+      icd10: "I50.9"
+      keywords:
+        - shortness of breath
+        - edema
+        - fatigue
+        - orthopnea
+      min_matches: 2
 
-# TODO: add Musculoskeletal conditions
+  neurological:
+    - name: "Migraine"
+      icd10: "G43.909"
+      keywords:
+        - headache
+        - nausea
+        - light sensitivity
+        - visual aura
+        - blurry vision
+      min_matches: 2
 
-# TODO: add Endocrine conditions (e.g. diabetes, thyroid)
+    - name: "Ischemic Stroke"
+      icd10: "I63.9"
+      keywords:
+        - facial droop
+        - arm weakness
+        - speech difficulty
+        - sudden headache
+      min_matches: 2
 
-# TODO: add Common primary care conditions (UTI, URTI, etc.)
+    - name: "Tension Headache"
+      icd10: "G44.209"
+      keywords:
+        - headache
+        - stress
+        - bilateral
+        - pressure
+      min_matches: 2
+
+  gastrointestinal:
+    - name: "Gastroenteritis"
+      icd10: "K59.1"
+      keywords:
+        - nausea
+        - vomiting
+        - diarrhea
+        - abdominal pain
+        - fever
+      min_matches: 3
+
+    - name: "GERD"
+      icd10: "K21.0"
+      keywords:
+        - heartburn
+        - acid reflux
+        - chest burning
+        - regurgitation
+      min_matches: 2
+
+  musculoskeletal:
+    - name: "Osteoarthritis"
+      icd10: "M19.90"
+      keywords:
+        - joint pain
+        - stiffness
+        - swelling
+        - osteoarthritis
+        - knee pain
+      min_matches: 2
+
+    - name: "Lower Back Pain"
+      icd10: "M54.5"
+      keywords:
+        - back pain
+        - lower back
+        - lumbar
+        - sciatica
+      min_matches: 2
+
+  infectious:
+    - name: "Upper Respiratory Tract Infection"
+      icd10: "J06.9"
+      keywords:
+        - sore throat
+        - runny nose
+        - congestion
+        - cough
+        - fever
+      min_matches: 3
+
+    - name: "Urinary Tract Infection"
+      icd10: "N39.0"
+      keywords:
+        - burning urination
+        - frequent urination
+        - dysuria
+        - cloudy urine
+      min_matches: 2
