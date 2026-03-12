@@ -39,6 +39,16 @@ huggingface-hub>=0.23.0
 
 google-genai>=1.0.0
 
+# ── Step 6: Reporting Engine (WeasyPrint — optional) ────────────────────────
+# If weasyprint is not installed, PDFGenerator automatically falls back to
+# saving HTML files (stdlib only, no extra dependencies).
+#
+# To enable PDF generation, run:
+#   pip install weasyprint>=60.0
+# Note: WeasyPrint also requires system libraries (Pango, Cairo, etc.)
+
+weasyprint>=60.0
+
 # ── Testing ──────────────────────────────────────────────────────────────────
 
 pytest>=8.0.0

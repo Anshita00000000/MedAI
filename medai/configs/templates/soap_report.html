@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedAI Clinical Note</title>
+  <title>MedAI Clinical Report</title>
   <style>
-    /* ── Base ── */
+    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Helvetica Neue", Arial, sans-serif;
       font-size: 11pt;
       color: #1a1a1a;
-      background: #fff;
-      padding: 2.5cm 2cm;
+      background: #ffffff;
+      padding: 2.2cm 2cm;
       max-width: 21cm;
       margin: 0 auto;
+      line-height: 1.55;
     }
 
     /* ── Header ── */
@@ -22,137 +23,201 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid #1a56a0;
-      padding-bottom: 0.8em;
-      margin-bottom: 1.5em;
+      border-bottom: 3px solid #1a3a5c;
+      padding-bottom: 0.9em;
+      margin-bottom: 1.2em;
     }
-    .report-header .clinic-name {
-      font-size: 15pt;
+    .clinic-name {
+      font-size: 18pt;
       font-weight: 700;
-      color: #1a56a0;
+      color: #1a3a5c;
+      letter-spacing: -0.02em;
     }
-    .report-header .meta {
+    .clinic-subtitle {
+      font-size: 9pt;
+      color: #2d7a4f;
+      font-weight: 600;
+      margin-top: 0.15em;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .report-meta {
       font-size: 9pt;
       color: #555;
       text-align: right;
-      line-height: 1.6;
+      line-height: 1.7;
     }
+    .report-meta strong { color: #1a3a5c; }
 
-    /* ── Patient banner ── */
+    /* ── AI Disclaimer Banner ── */
+    .ai-disclaimer-banner {
+      background: #fff8e1;
+      border: 1.5px solid #f59e0b;
+      border-radius: 5px;
+      padding: 0.55em 0.9em;
+      margin-bottom: 1.2em;
+      font-size: 8.5pt;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .ai-disclaimer-banner .icon { font-size: 11pt; }
+
+    /* ── Patient Banner ── */
     .patient-banner {
       background: #f0f5ff;
-      border-left: 4px solid #1a56a0;
-      padding: 0.6em 1em;
-      margin-bottom: 1.5em;
+      border-left: 4px solid #1a3a5c;
+      border-radius: 0 5px 5px 0;
+      padding: 0.7em 1.1em;
+      margin-bottom: 1.4em;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.5em;
-      font-size: 9.5pt;
+      gap: 0.6em;
     }
-    .patient-banner .field-label { color: #555; font-size: 8.5pt; }
-    .patient-banner .field-value { font-weight: 600; }
+    .banner-field .field-label {
+      font-size: 8pt;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.15em;
+    }
+    .banner-field .field-value {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #1a3a5c;
+    }
 
-    /* ── SOAP sections ── */
-    .soap-section {
+    /* ── Red Flags ── */
+    .red-flags-section {
       margin-bottom: 1.4em;
     }
-    .soap-section h2 {
-      font-size: 11pt;
+    .section-heading {
+      font-size: 10.5pt;
       font-weight: 700;
-      color: #1a56a0;
+      color: #1a3a5c;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid #d0dff0;
-      padding-bottom: 0.2em;
-      margin-bottom: 0.5em;
+      letter-spacing: 0.06em;
+      border-bottom: 1.5px solid #d0dff0;
+      padding-bottom: 0.25em;
+      margin-bottom: 0.7em;
     }
-    .soap-section p, .soap-section ul {
-      line-height: 1.65;
-      color: #222;
-    }
-    .soap-section ul { padding-left: 1.4em; }
-    .soap-section li { margin-bottom: 0.25em; }
-
-    /* ── Differential Diagnosis table ── */
-    .ddx-section { margin-bottom: 1.4em; }
-    .ddx-section h2 {
-      font-size: 11pt;
-      font-weight: 700;
-      color: #1a56a0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid #d0dff0;
-      padding-bottom: 0.2em;
-      margin-bottom: 0.6em;
-    }
-    table.ddx-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 9.5pt;
-    }
-    table.ddx-table th {
-      background: #1a56a0;
-      color: #fff;
-      padding: 0.4em 0.6em;
-      text-align: left;
-    }
-    table.ddx-table td {
-      padding: 0.35em 0.6em;
-      border-bottom: 1px solid #e0e8f0;
-    }
-    table.ddx-table tr:nth-child(even) td { background: #f7faff; }
-    .prob-high   { color: #b91c1c; font-weight: 600; }
-    .prob-medium { color: #d97706; font-weight: 600; }
-    .prob-low    { color: #16a34a; }
-
-    /* ── Red flags ── */
-    .red-flags { margin-bottom: 1.4em; }
-    .red-flags h2 {
-      font-size: 11pt;
-      font-weight: 700;
-      color: #b91c1c;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid #fca5a5;
-      padding-bottom: 0.2em;
-      margin-bottom: 0.6em;
-    }
+    .section-heading.red { color: #dc3545; border-color: #f5c6cb; }
     .flag-item {
       display: flex;
       align-items: baseline;
-      gap: 0.6em;
-      margin-bottom: 0.4em;
+      gap: 0.7em;
+      margin-bottom: 0.45em;
       font-size: 9.5pt;
     }
     .flag-badge {
-      padding: 0.15em 0.5em;
+      padding: 0.18em 0.55em;
       border-radius: 3px;
-      font-size: 8pt;
-      font-weight: 700;
+      font-size: 7.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       white-space: nowrap;
     }
-    .flag-badge.urgent  { background: #fee2e2; color: #b91c1c; }
-    .flag-badge.warning { background: #fef9c3; color: #92400e; }
-    .flag-badge.watch   { background: #dbeafe; color: #1e40af; }
+    .flag-badge.critical { background: #dc3545; color: #ffffff; }
+    .flag-badge.urgent   { background: #fd7e14; color: #ffffff; }
+    .flag-badge.monitor  { background: #ffc107; color: #212529; }
+    .flag-action {
+      font-size: 8.5pt;
+      color: #555;
+      font-style: italic;
+    }
+
+    /* ── SOAP Sections ── */
+    .soap-section { margin-bottom: 1.35em; }
+    .soap-section .section-heading { color: #1a3a5c; }
+    .soap-text {
+      color: #222;
+      white-space: pre-wrap;
+      font-size: 10.5pt;
+      line-height: 1.65;
+    }
+
+    /* ── DDx Table ── */
+    .ddx-section { margin-bottom: 1.4em; }
+    table.ddx-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin-top: 0.4em;
+    }
+    table.ddx-table th {
+      background: #1a3a5c;
+      color: #ffffff;
+      padding: 0.45em 0.65em;
+      text-align: left;
+      font-size: 8.5pt;
+      letter-spacing: 0.04em;
+    }
+    table.ddx-table td {
+      padding: 0.38em 0.65em;
+      border-bottom: 1px solid #e0e8f0;
+      vertical-align: top;
+    }
+    table.ddx-table tr:nth-child(even) td { background: #f7faff; }
+    .prob-badge {
+      padding: 0.12em 0.45em;
+      border-radius: 3px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .prob-high     { background: #d1fae5; color: #065f46; }
+    .prob-moderate { background: #fef3c7; color: #92400e; }
+    .prob-low      { background: #f3f4f6; color: #6b7280; }
+
+    /* ── Follow-up & Investigations ── */
+    .followup-section { margin-bottom: 1.4em; }
+    .followup-section ul {
+      padding-left: 1.5em;
+      font-size: 10pt;
+      color: #222;
+    }
+    .followup-section li { margin-bottom: 0.3em; line-height: 1.55; }
+
+    /* ── Confidence Bar ── */
+    .confidence-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+      margin-bottom: 1.2em;
+      font-size: 9pt;
+      color: #555;
+    }
+    .confidence-bar-outer {
+      flex: 1;
+      background: #e5e7eb;
+      border-radius: 4px;
+      height: 8px;
+      max-width: 180px;
+    }
+    .confidence-bar-inner {
+      height: 8px;
+      border-radius: 4px;
+      background: #2d7a4f;
+    }
 
     /* ── Footer ── */
     .report-footer {
-      margin-top: 2em;
-      border-top: 1px solid #ccc;
+      margin-top: 2.2em;
+      border-top: 1px solid #d0d5dd;
       padding-top: 0.6em;
       font-size: 8pt;
-      color: #888;
+      color: #9ca3af;
       display: flex;
       justify-content: space-between;
     }
-    .ai-disclaimer {
-      margin-top: 0.8em;
-      font-size: 8pt;
-      color: #b91c1c;
-      background: #fff7f7;
-      border: 1px solid #fca5a5;
-      border-radius: 4px;
-      padding: 0.5em 0.8em;
+
+    /* ── Print overrides ── */
+    @media print {
+      body { padding: 0; }
+      .report-header { page-break-after: avoid; }
+      .soap-section, .ddx-section { page-break-inside: avoid; }
     }
   </style>
 </head>
@@ -161,136 +226,88 @@
   <!-- ── Header ── -->
   <div class="report-header">
     <div>
-      <!-- TODO: replace with clinic logo <img> tag -->
-      <div class="clinic-name">{{ clinic_name | default("MedAI Clinic") }}</div>
-      <div style="font-size:9pt; color:#555;">AI-Assisted Clinical Note</div>
+      <div class="clinic-name">MedAI</div>
+      <div class="clinic-subtitle">AI-Assisted Clinical Documentation</div>
     </div>
-    <div class="meta">
-      <div><strong>Date:</strong> {{ note_date }}</div>
-      <div><strong>Provider:</strong> {{ provider_name | default("—") }}</div>
-      <div><strong>Note ID:</strong> {{ note_id }}</div>
+    <div class="report-meta">
+      <div><strong>Report Date:</strong> {{ report_date }}</div>
+      <div><strong>Speciality:</strong> {{ speciality }}</div>
+      <div><strong>Model:</strong> {{ model_used }}</div>
     </div>
   </div>
 
-  <!-- ── Patient banner ── -->
+  <!-- ── AI Disclaimer Banner ── -->
+  <div class="ai-disclaimer-banner">
+    <span class="icon">&#9888;</span>
+    <span>{{ ai_disclaimer }}</span>
+  </div>
+
+  <!-- ── Patient Banner ── -->
   <div class="patient-banner">
-    <div>
+    <div class="banner-field">
       <div class="field-label">Patient Name</div>
-      <div class="field-value">{{ patient_name | default("—") }}</div>
+      <div class="field-value">{{ patient_name }}</div>
     </div>
-    <div>
+    <div class="banner-field">
       <div class="field-label">Date of Birth</div>
-      <div class="field-value">{{ patient_dob | default("—") }}</div>
+      <div class="field-value">{{ patient_dob }}</div>
     </div>
-    <div>
+    <div class="banner-field">
       <div class="field-label">MRN</div>
-      <div class="field-value">{{ patient_mrn | default("—") }}</div>
+      <div class="field-value">{{ patient_mrn }}</div>
     </div>
-    <div>
-      <div class="field-label">Speciality</div>
-      <div class="field-value">{{ speciality | default("General Practice") }}</div>
+    <div class="banner-field">
+      <div class="field-label">Confidence</div>
+      <div class="field-value">{{ confidence }}</div>
     </div>
   </div>
+
+  <!-- ── Red Flags (conditional) ── -->
+  {{ red_flags_html }}
 
   <!-- ── SOAP Sections ── -->
   <div class="soap-section">
-    <h2>S — Subjective</h2>
-    <!-- TODO: populate via Jinja2: {{ soap.subjective | safe }} -->
-    <p><em>[ Chief complaint, history of present illness, review of systems, patient-reported symptoms ]</em></p>
+    <div class="section-heading">S &mdash; Subjective</div>
+    <div class="soap-text">{{ subjective }}</div>
   </div>
 
   <div class="soap-section">
-    <h2>O — Objective</h2>
-    <!-- TODO: {{ soap.objective | safe }} -->
-    <p><em>[ Vital signs, physical examination findings, investigation results ]</em></p>
+    <div class="section-heading">O &mdash; Objective</div>
+    <div class="soap-text">{{ objective }}</div>
   </div>
 
   <div class="soap-section">
-    <h2>A — Assessment</h2>
-    <!-- TODO: {{ soap.assessment | safe }} -->
-    <p><em>[ Primary diagnosis, clinical impression, problem list ]</em></p>
+    <div class="section-heading">A &mdash; Assessment</div>
+    <div class="soap-text">{{ assessment }}</div>
   </div>
 
   <div class="soap-section">
-    <h2>P — Plan</h2>
-    <!-- TODO: {{ soap.plan | safe }} -->
-    <ul>
-      <li><em>[ Investigations ordered ]</em></li>
-      <li><em>[ Medications prescribed ]</em></li>
-      <li><em>[ Referrals ]</em></li>
-      <li><em>[ Follow-up instructions ]</em></li>
-      <li><em>[ Patient education ]</em></li>
-    </ul>
+    <div class="section-heading">P &mdash; Plan</div>
+    <div class="soap-text">{{ plan }}</div>
   </div>
 
   <!-- ── Differential Diagnosis ── -->
   <div class="ddx-section">
-    <h2>Differential Diagnosis</h2>
-    <!-- TODO: render ddx_list via Jinja2 loop -->
-    <table class="ddx-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Diagnosis</th>
-          <th>ICD-10</th>
-          <th>Probability</th>
-          <th>Key Features</th>
-          <th>Next Steps</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- TODO:
-        {% for item in ddx_list %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.diagnosis }}</td>
-          <td>{{ item.icd10 }}</td>
-          <td class="prob-{{ item.probability | lower }}">{{ item.probability }}</td>
-          <td>{{ item.supporting_features }}</td>
-          <td>{{ item.next_steps }}</td>
-        </tr>
-        {% endfor %}
-        -->
-        <tr>
-          <td colspan="6" style="color:#aaa; font-style:italic;">
-            [ Differential diagnosis entries will appear here ]
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="section-heading">Differential Diagnosis</div>
+    {{ ddx_table_html }}
   </div>
 
-  <!-- ── Red Flags ── -->
-  <!-- TODO: {% if red_flags %} -->
-  <div class="red-flags">
-    <h2>&#9888; Red Flags / Alerts</h2>
-    <!-- TODO:
-    {% for flag in red_flags %}
-    <div class="flag-item">
-      <span class="flag-badge {{ flag.severity | lower }}">{{ flag.severity }}</span>
-      <span>{{ flag.description }}</span>
-    </div>
-    {% endfor %}
-    -->
-    <div class="flag-item">
-      <span class="flag-badge urgent">URGENT</span>
-      <span><em>[ Red flag entries will appear here when triggered ]</em></span>
-    </div>
+  <!-- ── Follow-up Questions ── -->
+  <div class="followup-section">
+    <div class="section-heading">Follow-up Questions</div>
+    {{ follow_up_questions }}
   </div>
-  <!-- TODO: {% endif %} -->
 
-  <!-- ── AI Disclaimer ── -->
-  <div class="ai-disclaimer">
-    &#9888; <strong>AI-Assisted Note:</strong> This note was generated with AI support and
-    must be reviewed, verified, and signed by a licensed clinician before being
-    entered into the patient record. It does not constitute a standalone medical opinion.
+  <!-- ── Recommended Investigations ── -->
+  <div class="followup-section">
+    <div class="section-heading">Recommended Investigations</div>
+    {{ investigations }}
   </div>
 
   <!-- ── Footer ── -->
   <div class="report-footer">
-    <span>Generated by MedAI v{{ version | default("0.1") }}</span>
-    <span>{{ note_date }} &mdash; Confidential Patient Record</span>
-    <span>Page <span class="page"></span></span>
+    <span>Generated by MedAI | For clinical review only | Not a substitute for physician judgment</span>
+    <span>{{ report_date }}</span>
   </div>
 
 </body>
