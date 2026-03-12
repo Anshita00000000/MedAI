@@ -21,13 +21,26 @@ entity_extraction:
 # SOAP Note Generation
 # ---------------------------------------------------------------------------
 soap_generation:
-  system: |
-    # TODO: system prompt for SOAP note generation
-    # Should define SOAP format, expected section headings, and
-    # instructions for handling incomplete information.
-  user: |
-    # TODO: user turn template
-    # Placeholders: {transcript}, {entities}
+  system: "You are a clinical documentation assistant. Generate a structured\
+    \ SOAP note from the doctor-patient conversation and extracted entities\
+    \ provided. Be concise, clinically accurate, and use standard medical\
+    \ terminology. Generate exactly four sections labelled SUBJECTIVE:,\
+    \ OBJECTIVE:, ASSESSMENT:, PLAN: — no text before SUBJECTIVE or after PLAN."
+  user_template: |
+    EXTRACTED ENTITIES:
+    Symptoms: {symptoms}
+    Clinical Findings: {clinical_findings}
+    Medications: {medications}
+    Medical History: {medical_history}
+    Vitals: {vitals}
+    Negations: {negations}
+    Speciality hints: {speciality_hints}
+
+    CONVERSATION:
+    {transcript}
+
+    Generate SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN sections.
+    Each section 2-5 sentences. Use bullet points where appropriate.
 
 # ---------------------------------------------------------------------------
 # Differential Diagnosis

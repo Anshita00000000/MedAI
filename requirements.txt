@@ -1,4 +1,4 @@
-# MedAI — Steps 0–3 Dependencies
+# MedAI — Steps 0–4 Dependencies
 # Install with: pip install -r requirements.txt
 
 # ── Step 0: Data Acquisition ────────────────────────────────────────────────
@@ -28,6 +28,16 @@ huggingface-hub>=0.23.0
 
 # scispacy>=0.5.3
 # https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.3/en_core_sci_md-0.5.3.tar.gz
+
+# ── Step 4: SOAP Note Generation (Google Gemini — optional) ─────────────────
+# If google-generativeai is not installed, SOAPGenerator automatically falls
+# back to the built-in template engine (stdlib only, no extra dependencies).
+#
+# To enable Gemini SOAP generation, run:
+#   pip install google-generativeai>=0.7.0
+# and set the GOOGLE_API_KEY environment variable.
+
+google-generativeai>=0.7.0
 
 # ── Testing ──────────────────────────────────────────────────────────────────
 
