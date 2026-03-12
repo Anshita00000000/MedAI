@@ -43,7 +43,7 @@ _GENAI_AVAILABLE = False
 _genai = None
 
 try:
-    import google.generativeai as _genai  # type: ignore
+    from google import genai as _genai  # type: ignore
     _GENAI_AVAILABLE = True
 except ImportError:
     pass
@@ -185,7 +185,7 @@ class SOAPGenerator:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "gemini-1.5-flash",
+        model: str = "gemini-2.0-flash",
     ) -> None:
         """
         Parameters
@@ -210,19 +210,12 @@ class SOAPGenerator:
 
         if not _GENAI_AVAILABLE:
             log.warning(
-                "google-generativeai is not installed — using template fallback. "
-                "Install with: pip install google-generativeai>=0.7.0"
+                "google-genai is not installed — using template fallback. "
+                "Install with: pip install google-genai>=1.0.0"
             )
         elif resolved_key:
             try:
-                _genai.configure(api_key=resolved_key)
-                self._client = _genai.GenerativeModel(
-                    model_name=model,
-                    generation_config={
-                        "temperature": _TEMPERATURE,
-                        "max_output_tokens": _MAX_OUTPUT_TOKENS,
-                    },
-                )
+                self._client = _genai.Client(api_key=resolved_key)
                 self.use_fallback = False
                 log.info("SOAPGenerator initialised with model %r", model)
             except Exception as exc:  # noqa: BLE001
@@ -504,7 +497,14 @@ class SOAPGenerator:
 
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
-                response = self._client.generate_content(prompt)
+                response = self._client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=_genai.types.GenerateContentConfig(
+                        temperature=_TEMPERATURE,
+                        max_output_tokens=_MAX_OUTPUT_TOKENS,
+                    ),
+                )
                 return response.text
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc
