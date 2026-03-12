@@ -501,7 +501,10 @@ with tab_input:
             def _advance():
                 for pct, msg in _steps:
                     time.sleep(0.45)
-                    progress_bar.progress(pct, text=msg)
+                    try:
+                        progress_bar.progress(pct, text=msg)
+                    except Exception:
+                        pass
 
             _t = threading.Thread(target=_advance, daemon=True)
             _t.start()
