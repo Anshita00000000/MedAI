@@ -1,5 +1,7 @@
-# MedAI — Step 0: Data Acquisition
+# MedAI — Steps 0–3 Dependencies
 # Install with: pip install -r requirements.txt
+
+# ── Step 0: Data Acquisition ────────────────────────────────────────────────
 
 # HuggingFace dataset downloading & streaming
 datasets>=2.19.0
@@ -15,3 +17,18 @@ tqdm>=4.66.0
 
 # Used by datasets for hub authentication (optional but avoids warnings)
 huggingface-hub>=0.23.0
+
+# ── Step 3: Entity Extraction (scispaCy — optional) ─────────────────────────
+# If scispaCy is not installed, EntityExtractor automatically falls back to
+# the built-in rule-based engine (stdlib only, no extra dependencies).
+#
+# To enable scispaCy NER, run:
+#   pip install scispacy
+#   pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.3/en_core_sci_md-0.5.3.tar.gz
+
+# scispacy>=0.5.3
+# https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.3/en_core_sci_md-0.5.3.tar.gz
+
+# ── Testing ──────────────────────────────────────────────────────────────────
+
+pytest>=8.0.0
