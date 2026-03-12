@@ -49,6 +49,16 @@ google-genai>=1.0.0
 
 weasyprint>=60.0
 
+# ── Step 7: REST API ─────────────────────────────────────────────────────────
+
+# FastAPI web framework + ASGI server
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
+# Required by FastAPI for multipart/form-data (file uploads)
+python-multipart>=0.0.9
+
 # ── Testing ──────────────────────────────────────────────────────────────────
 
 pytest>=8.0.0
+httpx>=0.27.0
