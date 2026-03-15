@@ -62,6 +62,17 @@ python-multipart>=0.0.9
 
 streamlit>=1.32.0
 
+# ── Step 9: Voice / Audio Input ──────────────────────────────────────────────
+# Whisper: speech-to-text with word-level timestamps
+# Install: pip install openai-whisper
+# Note: also requires ffmpeg system package (apt install ffmpeg / brew install ffmpeg)
+openai-whisper>=20231117
+
+# pyannote.audio: speaker diarisation (requires HF_TOKEN env var)
+# Install: pip install pyannote.audio
+# Note: requires accepting pyannote model licence on HuggingFace Hub
+pyannote.audio>=3.1.0
+
 # ── Testing ──────────────────────────────────────────────────────────────────
 
 pytest>=8.0.0

@@ -140,6 +140,12 @@ _STATE_DEFAULTS: dict[str, Any] = {
     "last_api_url": "http://localhost:8000",
     "fhir_bundle": None,
     "reference_note": None,
+    # Audio input state
+    "audio_raw_turns": [],       # [{speaker, text, start, end}] from alignment
+    "audio_role_map": {},        # {SPEAKER_XX: "Doctor"} from Gemini / fallback
+    "audio_role_overrides": {},  # {SPEAKER_XX: "Patient"} from user corrections
+    "audio_confirmed": False,
+    "audio_confirmed_turns": [], # [{speaker: "DOCTOR", text: "…"}] for pipeline
 }
 
 for _k, _v in _STATE_DEFAULTS.items():
@@ -310,6 +316,124 @@ def _load_file_bytes(path: str) -> bytes | None:
 
 
 # ---------------------------------------------------------------------------
+# Audio-input helpers
+# ---------------------------------------------------------------------------
+
+# Import role constants from audio_processor lazily so startup remains fast
+# when pyannote / whisper are not installed.
+def _get_audio_constants() -> tuple[list[str], dict[str, str], dict[str, str]]:
+    """Return (ROLE_OPTIONS, ROLE_COLOURS, ROLE_TO_SPEAKER) from audio_processor."""
+    import sys
+    from pathlib import Path as _P
+    _root = str(_P(__file__).resolve().parents[3])
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+    from medai.src.voice.audio_processor import (  # noqa: PLC0415
+        ROLE_OPTIONS,
+        ROLE_COLOURS,
+        ROLE_TO_SPEAKER,
+    )
+    return ROLE_OPTIONS, ROLE_COLOURS, ROLE_TO_SPEAKER
+
+
+# Eagerly resolve constants at module load; fall back to sensible defaults so
+# the demo still starts even when the voice package cannot be imported.
+try:
+    _ROLE_OPTIONS, _ROLE_COLOURS, _ROLE_TO_SPEAKER = _get_audio_constants()
+except Exception:
+    _ROLE_OPTIONS = ["Doctor", "Patient", "Caregiver", "Nurse", "Other"]
+    _ROLE_COLOURS = {
+        "Doctor": "#1a6fad",
+        "Patient": "#2d7a4f",
+        "Caregiver": "#9b59b6",
+        "Nurse": "#e67e22",
+        "Other": "#7f8c8d",
+    }
+    _ROLE_TO_SPEAKER = {
+        "Doctor": "DOCTOR",
+        "Nurse": "DOCTOR",
+        "Patient": "PATIENT",
+        "Caregiver": "PATIENT",
+        "Other": "DOCTOR",
+    }
+
+
+def _process_audio_file(
+    audio_bytes: bytes,
+    filename: str,
+) -> tuple[list[dict], dict[str, str], str]:
+    """
+    Save uploaded audio bytes to a temp file, run the AudioProcessor
+    pipeline, and return ``(raw_turns, role_map, error_message)``.
+
+    *raw_turns* is a list of ``{speaker, text, start, end}`` dicts.
+    *role_map* maps ``SPEAKER_XX`` labels to inferred role strings.
+    *error_message* is empty on success.
+    """
+    import os
+    import sys
+    import tempfile
+    from pathlib import Path as _P
+
+    suffix = _P(filename).suffix or ".wav"
+    _root = str(_P(__file__).resolve().parents[3])
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+
+    try:
+        from medai.src.voice.audio_processor import AudioProcessor  # noqa: PLC0415
+    except ImportError as exc:
+        return [], {}, f"AudioProcessor unavailable: {exc}"
+
+    tmp_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+
+        ap = AudioProcessor()
+        audio_p = _P(tmp_path)
+        words = ap.transcribe(audio_p)
+        segments = ap.diarise(audio_p)
+        raw_turns = ap.align(words, segments)
+        role_map = ap.infer_roles(raw_turns)
+        return raw_turns, role_map, ""
+    except Exception as exc:
+        return [], {}, str(exc)
+    finally:
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+
+def _apply_role_map(
+    raw_turns: list[dict],
+    role_map: dict[str, str],
+) -> list[dict[str, str]]:
+    """
+    Convert audio raw_turns with ``SPEAKER_XX`` labels to pipeline turn dicts.
+
+    Roles are mapped to pipeline-compatible speaker labels:
+
+    * Doctor / Nurse → ``"DOCTOR"``
+    * Patient / Caregiver → ``"PATIENT"``
+    * Other → ``"DOCTOR"`` (safe fallback)
+
+    Returns
+    -------
+    list[dict] with keys ``"speaker"`` and ``"text"``.
+    """
+    turns: list[dict[str, str]] = []
+    for t in raw_turns:
+        role = role_map.get(t["speaker"], t["speaker"])
+        speaker = _ROLE_TO_SPEAKER.get(role, "DOCTOR")
+        turns.append({"speaker": speaker, "text": t["text"]})
+    return turns
+
+
+# ---------------------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------------------
 
@@ -410,22 +534,156 @@ with tab_input:
             st.markdown("**Preview:**")
             st.text(preview[:400] + ("\n…" if len(preview) > 400 else ""))
 
-    # Right column -- manual input + patient info
+    # Right column -- input mode selector (Text / Audio) + patient info
     with col_custom:
-        st.subheader("Upload Your Own Transcript")
-        new_text: str = st.text_area(
-            "Paste transcript",
-            value=st.session_state["transcript_text"],
-            height=260,
-            placeholder=(
-                "DOCTOR: What brings you in today?\n"
-                "PATIENT: I have been having chest pain..."
-            ),
-            help='Format each line as "DOCTOR: ..." or "PATIENT: ..."',
-            label_visibility="collapsed",
+        input_mode_val: str = st.radio(
+            "Input Method",
+            ["📝 Text", "🎙️ Audio"],
+            horizontal=True,
+            key="input_mode_radio",
         )
-        st.session_state["transcript_text"] = new_text
+        is_audio_mode = input_mode_val == "🎙️ Audio"
 
+        if not is_audio_mode:
+            # ── Text input ─────────────────────────────────────────────────
+            st.subheader("Paste Your Transcript")
+            new_text: str = st.text_area(
+                "Paste transcript",
+                value=st.session_state["transcript_text"],
+                height=240,
+                placeholder=(
+                    "DOCTOR: What brings you in today?\n"
+                    "PATIENT: I have been having chest pain..."
+                ),
+                help='Format each line as "DOCTOR: ..." or "PATIENT: ..."',
+                label_visibility="collapsed",
+            )
+            st.session_state["transcript_text"] = new_text
+
+        else:
+            # ── Audio upload ───────────────────────────────────────────────
+            st.subheader("Upload Audio File")
+            audio_file = st.file_uploader(
+                "Upload a clinical consultation recording",
+                type=["wav", "mp3", "m4a"],
+                label_visibility="collapsed",
+                help=(
+                    "Supported formats: WAV, MP3, M4A. "
+                    "Requires openai-whisper and pyannote.audio to be installed, "
+                    "and HF_TOKEN to be set in the environment."
+                ),
+            )
+
+            if audio_file is not None:
+                if st.button("🎙️ Transcribe & Diarise", use_container_width=True):
+                    with st.spinner(
+                        "Running Whisper transcription + pyannote diarisation… "
+                        "(this may take a minute)"
+                    ):
+                        _raw, _rmap, _err = _process_audio_file(
+                            audio_file.read(), audio_file.name
+                        )
+                    if _err:
+                        st.error(f"Audio processing failed: {_err}")
+                    else:
+                        st.session_state["audio_raw_turns"] = _raw
+                        st.session_state["audio_role_map"] = _rmap
+                        st.session_state["audio_role_overrides"] = {}
+                        st.session_state["audio_confirmed"] = False
+                        st.session_state["audio_confirmed_turns"] = []
+                        st.success(
+                            f"Transcribed {len(_raw)} speaker turns. "
+                            "Review and confirm roles below."
+                        )
+
+            # ── Colour-coded transcript + role correction ──────────────────
+            _raw_turns: list[dict] = st.session_state.get("audio_raw_turns", [])
+            _role_map: dict = st.session_state.get("audio_role_map", {})
+
+            if _raw_turns:
+                st.markdown("**Diarised Transcript** — review and correct speaker roles:")
+
+                # Role-correction dropdowns (one per unique speaker)
+                unique_spks = list(dict.fromkeys(t["speaker"] for t in _raw_turns))
+                overrides: dict[str, str] = {}
+                num_spks = max(1, len(unique_spks))
+                spk_cols = st.columns(num_spks)
+                for col_i, spk in enumerate(unique_spks):
+                    inferred = _role_map.get(spk, "Other")
+                    saved_override = st.session_state.get(
+                        "audio_role_overrides", {}
+                    ).get(spk, inferred)
+                    default_idx = (
+                        _ROLE_OPTIONS.index(saved_override)
+                        if saved_override in _ROLE_OPTIONS
+                        else len(_ROLE_OPTIONS) - 1
+                    )
+                    selected = spk_cols[col_i].selectbox(
+                        spk,
+                        options=_ROLE_OPTIONS,
+                        index=default_idx,
+                        key=f"audio_role_{spk}",
+                    )
+                    overrides[spk] = selected
+
+                # Compute effective role map (overrides win)
+                effective_map: dict[str, str] = {**_role_map, **overrides}
+
+                # Colour-coded turn-by-turn preview
+                preview_html = ""
+                display_turns = _raw_turns[:30]
+                for turn in display_turns:
+                    role = effective_map.get(turn["speaker"], turn["speaker"])
+                    colour = _ROLE_COLOURS.get(role, "#7f8c8d")
+                    text_safe = (
+                        turn["text"]
+                        .replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                    )
+                    ts = (
+                        f'<span style="color:#aaa;font-size:0.78em">'
+                        f' [{turn["start"]:.1f}s]</span>'
+                        if "start" in turn
+                        else ""
+                    )
+                    preview_html += (
+                        f'<div style="border-left:4px solid {colour};'
+                        f'padding:3px 10px;margin:3px 0;font-size:0.88em;">'
+                        f'<strong style="color:{colour}">{role}</strong>'
+                        f" <span style=\"color:#888;font-size:0.8em\">"
+                        f"({turn['speaker']})</span>{ts}<br>"
+                        f"{text_safe}</div>"
+                    )
+                if len(_raw_turns) > 30:
+                    preview_html += (
+                        f'<p style="color:#888;font-size:0.8em;margin-top:4px">'
+                        f"… {len(_raw_turns) - 30} more turns not shown</p>"
+                    )
+                st.markdown(preview_html, unsafe_allow_html=True)
+
+                # Confirm Roles button
+                if st.button(
+                    "✅ Confirm Roles & Prepare for Pipeline",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    confirmed_turns = _apply_role_map(_raw_turns, effective_map)
+                    st.session_state["audio_confirmed_turns"] = confirmed_turns
+                    st.session_state["audio_confirmed"] = True
+                    st.session_state["audio_role_overrides"] = overrides
+                    st.success(
+                        f"Roles confirmed — {len(confirmed_turns)} turns ready. "
+                        "Click **▶ Run Pipeline** below."
+                    )
+
+                if st.session_state.get("audio_confirmed"):
+                    st.caption(
+                        f"✅ {len(st.session_state['audio_confirmed_turns'])} turns "
+                        "confirmed. Run Pipeline when ready."
+                    )
+
+        # ── Patient info (shown in both modes) ────────────────────────────
         st.markdown("**Patient Information** *(optional)*")
         pc1, pc2, pc3 = st.columns(3)
         with pc1:
@@ -454,8 +712,17 @@ with tab_input:
 
     st.divider()
 
-    # Run button
-    can_run = bool(st.session_state["transcript_text"].strip())
+    # ── Run button ────────────────────────────────────────────────────────
+    if is_audio_mode:
+        can_run = bool(st.session_state.get("audio_confirmed"))
+        run_hint = (
+            "Transcribe an audio file and confirm roles above, "
+            "then click Run Pipeline."
+        )
+    else:
+        can_run = bool(st.session_state["transcript_text"].strip())
+        run_hint = "Load or paste a transcript above, then click Run Pipeline."
+
     run_clicked = st.button(
         "▶  Run Pipeline",
         type="primary",
@@ -464,16 +731,20 @@ with tab_input:
     )
 
     if not can_run:
-        st.caption("Load or paste a transcript above, then click Run Pipeline.")
+        st.caption(run_hint)
 
     if run_clicked:
-        raw_text = st.session_state["transcript_text"].strip()
-        turns = _parse_transcript(raw_text)
+        if is_audio_mode:
+            turns = st.session_state["audio_confirmed_turns"]
+        else:
+            raw_text = st.session_state["transcript_text"].strip()
+            turns = _parse_transcript(raw_text)
 
         if not turns:
             st.error(
-                "Could not parse any DOCTOR/PATIENT turns. "
-                "Ensure each line starts with 'DOCTOR:' or 'PATIENT:'."
+                "No turns available. "
+                "For Text mode: ensure each line starts with 'DOCTOR:' or 'PATIENT:'. "
+                "For Audio mode: transcribe the file and confirm roles first."
             )
         else:
             # Build optional patient info
